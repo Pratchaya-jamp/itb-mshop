@@ -1,0 +1,21 @@
+FROM openjdk:17-jdk-slim AS build
+
+# Set work directory
+WORKDIR /app
+
+# Copy Maven wrapper + source code
+COPY . .
+
+# Give permission to mvnw
+RUN chmod +x mvnw
+
+# Build the app using the wrapper
+RUN ./mvnw clean package -DskipTests
+
+# Run phase
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=build /app/target/*.jar app.jar
+EXPOSE 8080
+EXPOSE 5005
+ENTRYPOINT ["java", "-jar", "app.jar"]
