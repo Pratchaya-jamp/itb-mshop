@@ -1,8 +1,8 @@
 <script setup>
 import { RouterView, useRoute } from 'vue-router'
 import { computed } from 'vue'
-import Footer from './components/Footer.vue'
-import Hearder from './components/Header.vue'
+import Footer from './components/InterfaceUI/Footer.vue'
+import Hearder from './components/InterfaceUI/Header.vue'
 
 const route = useRoute()
 const showHeader = computed(() => route.path !== '/')
@@ -13,7 +13,7 @@ const showHeader = computed(() => route.path !== '/')
     <div>
         <router-view></router-view>
     </div>
-    <Footer/>
+    <Footer />
 </template>
 
 <style scoped>

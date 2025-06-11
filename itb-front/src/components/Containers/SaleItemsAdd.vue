@@ -20,8 +20,8 @@ const product = ref({
   quantity: '',
 })
 
-const imageList = ref(['/sy4/phone/iPhone.jpg', '/sy4/phone/iPhone2.jpg','/sy4/phone/iPhone3.jpg','/sy4/phone/iPhone4.jpg'])
-const mainImage = ref('/sy4/phone/iPhone.jpg')
+const imageList = ref(['/phone/iPhone.jpg', '/phone/iPhone2.jpg','/phone/iPhone3.jpg','/phone/iPhone4.jpg'])
+const mainImage = ref('/phone/iPhone.jpg')
 const responseMessage = ref('')
 const originalProduct = ref(null)
 const addnewitemMessage = ref('New Sale ltem')
@@ -71,7 +71,7 @@ const brandError = ref('')
 
 onMounted(async () => {
   try {
-    const data = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands')
+    const data = await getItems('http://localhost:8080/itb-mshop/v1/brands')
     brandList.value = data.sort((a, b) => {
   if (a.brandName < b.brandName) {
     return -1;
@@ -86,7 +86,7 @@ onMounted(async () => {
   }
   if (id) {
     isEditMode.value = true
-    const data = await getItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items', id)
+    const data = await getItemById('http://localhost:8080/itb-mshop/v1/sale-items', id)
     if (data) {
       const formattedProduct = {
         id: data.id,
@@ -339,7 +339,7 @@ const confirmAddItem = async () => {
 if (isEditMode.value) {
   try {
     const result = await editItem(
-      'http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items', id,
+      'http://localhost:8080/itb-mshop/v1/sale-items', id,
       newProduct
     );
 
@@ -366,7 +366,7 @@ if (isEditMode.value) {
 } else {
   try {
     const result = await addItem(
-      'http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items',
+      'http://localhost:8080/itb-mshop/v1/sale-items',
       newProduct
     );
 

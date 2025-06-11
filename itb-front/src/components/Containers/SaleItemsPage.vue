@@ -42,7 +42,7 @@ const availableBrands = computed(() => {
 // Fetch
 async function fetchItems() {
   try {
-    const response = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v2/sale-items', {
+    const response = await getItems('http://localhost:8080/itb-mshop/v2/sale-items', {
       params: {
         filterBrands: selectedBrands.value.length ? selectedBrands.value : undefined,
         page: currentPage.value,
@@ -67,7 +67,7 @@ async function fetchItems() {
 
 async function fetchbrand() {
   try {
-    const data = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands')
+    const data = await getItems('http://localhost:8080/itb-mshop/v1/brands')
     brandList.value = data.sort((a, b) => {
 
    const brandA = a.brandName ? a.brandName.toLowerCase() : ''
@@ -251,7 +251,7 @@ const confirmDelete = async () => {
   showDeleteConfirmationPopup.value = false
   isDeleting.value = true
   try {
-    const statusCode = await deleteItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items', deleteSale.value);
+    const statusCode = await deleteItemById('http://localhost:8080/itb-mshop/v1/sale-items', deleteSale.value);
     if (statusCode === 204) {
       setTimeout(async () => {
         isDeleting.value = false
@@ -502,7 +502,7 @@ watch(
           @click="goToPhoneDetails(item.id)"
         >
           <img
-            :src="'/sy4/phone/iPhone.jpg'"
+            :src="'./phone/SidePhone.jpg'"
             alt="phone"
             class="w-full h-40 object-contain mb-4"
           />

@@ -43,10 +43,10 @@ const goToSaleItemsList = () => {
 
 onMounted(async () => {
   try {
-    const data = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands')
+    const data = await getItems('http://localhost:8080/itb-mshop/v1/brands')
     items.value = data.sort((a, b) => a.id - b.id)
-    const saleItemsData = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items')
-    saleItems.value = saleItemsData
+    const saleItemsData = await getItems('http://localhost:8080/itb-mshop/v1/sale-items')
+    saleItems.value = saleItemsData
   } catch (err) {
     console.error('Error loading items:', err)
   }
@@ -145,7 +145,7 @@ const confirmDelete = async () => {
 
   isDeleting.value = true
   try {
-    const statusCode = await deleteItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands', deleteId.value);
+    const statusCode = await deleteItemById('http://localhost:8080/itb-mshop/v1/brands', deleteId.value);
     if (statusCode === 204) {
       setTimeout(() => {
         isDeleting.value = false

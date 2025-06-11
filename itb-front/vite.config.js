@@ -17,11 +17,11 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url))
     },
   },
-  server: {
-    host: '0.0.0.0',   // <<< สำคัญ: เพื่อให้ container ฟังจากทุกที่
-    port: 5173,
-    strictPort: true,
-    allowedHosts: ['ip24sy4.sit.kmutt.ac.th'],
-  },
-  base: '/sy4',
+  //server: {
+  //  host: '0.0.0.0',
+  //  port: 5173,
+  //  strictPort: true,
+  //  allowedHosts: ['ip24sy4.sit.kmutt.ac.th'],
+  //},
+  //base: '/sy4',
 })

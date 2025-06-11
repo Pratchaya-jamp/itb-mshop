@@ -41,7 +41,7 @@ const brand = ref({
  onMounted(async () => {
     if (id) {
     isEditMode.value = true
-    const data = await getItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands', id)
+    const data = await getItemById('http://localhost:8080/itb-mshop/v1/brands', id)
 
     if (data) {
       const formattedBrand = {
@@ -173,7 +173,7 @@ const confirmAddItem = async () => {
 if (isEditMode.value) {
   try {
     const result = await editItem(
-      'http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands', id,
+      'http://localhost:8080/itb-mshop/v1/brands', id,
       newbrand
     );
 
@@ -200,7 +200,7 @@ if (isEditMode.value) {
 } else {
   try {
     const result = await addItem(
-      'http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands',
+      'http://localhost:8080/itb-mshop/v1/brands',
       newbrand
     );
 
