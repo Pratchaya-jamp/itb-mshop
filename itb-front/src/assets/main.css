@@ -1,2 +1,38 @@
 @import "tailwindcss";
 @plugin "daisyui";
+
+:root {
+  /* Light Theme */
+  --color-background: #ffffff;
+  --color-text: #111827;
+  --color-text-secondary: #4b5563;
+  --color-hover: #000000;
+  --color-secondary-bg: #f3f4f6;
+  --color-secondary-text: #4b5563;
+  --color-card-bg: #ffffff;
+  --color-border: #e5e7eb;
+  --color-card-bg-transparent: #ffffffcc;
+  --color-input-bg: #ffffff;
+  --color-text-input: #000000;
+  --color-toggle-bg: #e5e7eb;
+  --color-toggle-hover: #d1d5db;
+  --color-toggle-text: #111827;
+}
+
+body.dark-theme {
+  /* Dark Theme */
+  --color-background: #0d1117;
+  --color-text: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-hover: #ffffff;
+  --color-secondary-bg: #161b22;
+  --color-secondary-text: #d1d5db;
+  --color-card-bg: #1e293b;
+  --color-border: #334155;
+  --color-card-bg-transparent: #0d1117cc;
+  --color-input-bg: #1e293b;
+  --color-text-input: #f9fafb;
+  --color-toggle-bg: #374151;
+  --color-toggle-hover: #4b5563;
+  --color-toggle-text: #ffffff;
+}

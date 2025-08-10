@@ -4,17 +4,53 @@ import { useRoute, useRouter } from 'vue-router'
 import { getItems } from '@/libs/fetchUtilsOur';
 import { deleteItemById } from '@/libs/fetchUtilsOur'
 
-// Add Theme-related state and functions
-const theme = ref('light')
+// 1. ดึงค่า theme จาก localStorage ตั้งแต่แรก
+const theme = ref(localStorage.getItem('theme') || 'dark')
+
+// 2. ฟังก์ชันสำหรับสลับ Theme และอัปเดต localStorage
+const toggleTheme = () => {
+  const newTheme = theme.value === 'dark' ? 'light' : 'dark'
+  theme.value = newTheme
+  localStorage.setItem('theme', newTheme) // บันทึกค่าใหม่ลงใน localStorage
+}
+
+// 3. ตั้งค่า Event Listener เมื่อ component ถูก mount
+onMounted(async () => {
+  // ตั้งค่า theme ตาม localStorage
+  const storedTheme = localStorage.getItem('theme');
+  if (storedTheme) {
+    theme.value = storedTheme;
+  }
+  
+  // เพิ่ม event listener เพื่อฟังการเปลี่ยนแปลงของ localStorage จากหน้าอื่น
+  window.addEventListener('storage', (event) => {
+    if (event.key === 'theme') {
+      theme.value = event.newValue || 'dark';
+    }
+  });
+
+  try {
+    const data = await getItems('http://localhost:8080/itb-mshop/v1/brands')
+    items.value = data.sort((a, b) => a.id - b.id)
+    const saleItemsData = await getItems('http://localhost:8080/itb-mshop/v1/sale-items')
+    saleItems.value = saleItemsData
+  } catch (err) {
+    console.error('Error loading items:', err)
+  }
+})
+
+// 4. Watcher สำหรับอัปเดต class ของ body ตาม theme
+watch(theme, (newTheme) => {
+  document.body.className = newTheme === 'dark' ? 'dark-theme' : '';
+});
+
+// โค้ดส่วนอื่นๆ ที่เกี่ยวกับ Theme ยังคงเดิม
 const themeClass = computed(() => (theme.value === 'dark' ? 'dark bg-gray-900 text-white' : 'light bg-white text-gray-950'))
 const iconComponent = computed(() => 
   theme.value === 'dark' 
     ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>` 
     : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`
 )
-const toggleTheme = () => {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-}
 
 const router = useRouter()
 const route = useRoute()
@@ -53,16 +89,6 @@ const goToSaleItemsList = () => {
   router.push('/sale-items/list') 
 }
 
-onMounted(async () => {
-  try {
-    const data = await getItems('http://localhost:8080/itb-mshop/v1/brands')
-    items.value = data.sort((a, b) => a.id - b.id)
-    const saleItemsData = await getItems('http://localhost:8080/itb-mshop/v1/sale-items')
-    saleItems.value = saleItemsData
-  } catch (err) {
-    console.error('Error loading items:', err)
-  }
-})
 
 const filteredAndSortedItems = computed(() => {
   let result = [...items.value]

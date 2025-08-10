@@ -32,24 +32,19 @@ const closeSuccessPopup = () => {
     showEditFallPopup.value = false
 }
 
-// โค้ด Theme Logic จาก Landing Page
-const theme = ref('dark')
+// **ปรับปรุง Theme Logic**
+const theme = ref(localStorage.getItem('theme') || 'dark')
 
-const toggleTheme = () => {
-    theme.value = theme.value === 'dark' ? 'light' : 'dark'
+const applyTheme = (newTheme) => {
+    document.body.className = newTheme === 'dark' ? 'dark-theme' : ''
+    localStorage.setItem('theme', newTheme)
+    theme.value = newTheme
 }
 
-const themeClass = computed(() => {
-    return theme.value === 'dark'
-        ? 'bg-gray-950 text-white'
-        : 'bg-white text-gray-950'
-})
-
-const iconComponent = computed(() => {
-    return theme.value === 'dark'
-        ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`
-        : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>`
-})
+const toggleTheme = () => {
+    const newTheme = theme.value === 'dark' ? 'light' : 'dark'
+    applyTheme(newTheme)
+}
 
 onMounted(async () => {
     try {
@@ -70,6 +65,11 @@ onMounted(async () => {
         setTimeout(() => {
             router.push('/sale-items')
         }, 3000)
+    }
+    // ใช้ onMounted เพื่อตั้งค่า theme เมื่อ component โหลดเสร็จ
+    const savedTheme = localStorage.getItem('theme')
+    if (savedTheme) {
+        applyTheme(savedTheme)
     }
 })
 
@@ -131,6 +131,18 @@ const confirmDelete = async () => {
 const cancelDeleteItem = () => {
     showDeleteConfirmationPopup.value = false
 }
+
+const themeClass = computed(() => {
+    return theme.value === 'dark'
+      ? 'bg-gray-950 text-white'
+      : 'bg-white text-gray-950'
+})
+
+const iconComponent = computed(() => {
+    return theme.value === 'dark'
+      ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>` // sun icon
+      : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>` // moon icon
+})
 </script>
 
 <template>
@@ -289,7 +301,7 @@ const cancelDeleteItem = () => {
                 <div
                     class="p-8 rounded-2xl shadow-xl text-center transition-colors duration-500 transform scale-110"
                     :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'">
-                    <svg class="animate-spin h-10 w-10 text-blue-500 mx-auto mb-4" xmlns="http://www.w3.org/2000/svg"
+                    <svg class="animate-spin h-8 w-8 text-orange-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4" />
                         <path class="opacity-75" fill="currentColor"
@@ -308,7 +320,7 @@ const cancelDeleteItem = () => {
                     <h2 class="text-2xl font-bold mb-4 text-green-500">Success!</h2>
                     <p class="itbms-message mb-6 text-lg">The sale item has been successfully updated!</p>
                     <button @click="closeSuccessPopup"
-                        class="bg-blue-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-blue-600 active:scale-95">Done</button>
+                        class="bg-green-500 text-white border-2 border-green-500 rounded-full px-6 py-2 transition-colors duration-300 hover:bg-transparent hover:text-green-500 font-semibold">Done</button>
                 </div>
             </div>
         </transition>
@@ -389,7 +401,7 @@ const cancelDeleteItem = () => {
     display: none;
 }
 .overflow-x-auto {
-    -ms-overflow-style: none;  /* IE and Edge */
-    scrollbar-width: none;  /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
 }
 </style>

@@ -1,11 +1,27 @@
 <script setup>
 import { useRouter } from 'vue-router'
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const router = useRouter()
 const services = ref(null)
 const contact = ref(null)
-const theme = ref('dark')
+
+const theme = ref(localStorage.getItem('theme') || 'dark')
+
+const applyTheme = (newTheme) => {
+  document.body.className = newTheme === 'dark' ? 'dark-theme' : ''
+  localStorage.setItem('theme', newTheme)
+  theme.value = newTheme
+}
+
+const toggleTheme = () => {
+  const newTheme = theme.value === 'dark' ? 'light' : 'dark'
+  applyTheme(newTheme)
+}
+
+onMounted(() => {
+  applyTheme(theme.value)
+})
 
 const navigateToSaleItems = () => {
   router.push('/sale-items')
@@ -15,10 +31,6 @@ const navigateToBrands = () => {
 }
 const scrollTo = (target) => {
   target?.scrollIntoView({ behavior: 'smooth' })
-}
-
-const toggleTheme = () => {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
 }
 
 const themeClass = computed(() => {
