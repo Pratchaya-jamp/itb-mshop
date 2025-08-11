@@ -11,7 +11,6 @@ const showDeleteSuccessPopup = ref(false)
 const showfailPopup = ref(false)
 const isGridView = computed(() => route.path !== '/sale-items/list')
 
-const showBrandFilterModal = ref(false)
 const items = ref([])
 const totalPages = ref(0)
 const brandList = ref([])
@@ -25,6 +24,33 @@ const selectedBrands = ref(
   JSON.parse(sessionStorage.getItem('selectedBrands') || 'null') ??
   (route.query.filterBrands ? [].concat(route.query.filterBrands) : [])
 )
+const selectedPrices = ref(
+  JSON.parse(sessionStorage.getItem('selectedPrices') || 'null') ??
+  (route.query.filterPrices ? [].concat(route.query.filterPrices) : [])
+)
+const selectedStorages = ref(
+  JSON.parse(sessionStorage.getItem('selectedStorages') || 'null') ??
+  (route.query.filterStorages ? [].concat(route.query.filterStorages) : [])
+)
+
+const priceOptions = ref([
+  '0 - 5,000 Baht',
+  '5,001 - 10,000 Baht',
+  '10,001 - 20,000 Baht',
+  '20,001 - 30,000 Baht',
+  '30,001 - 40,000 Baht',
+  '40,001 - 50,000 Baht',
+  '50,001 + Baht',
+])
+
+const storageOptions = ref([
+  '32Gb',
+  '64Gb',
+  '128Gb',
+  '256Gb',
+  '512Gb',
+  '1Tb+',
+])
 
 const savedSort = sessionStorage.getItem('sortOrder')
 const currentSortOrder = ref(savedSort || 'createdOn')
@@ -36,22 +62,75 @@ const availableBrands = computed(() => {
 });
 
 // Theme Logic
-const theme = ref('light') // ตั้งค่าเริ่มต้นให้เป็น light เพื่อให้สอดคล้องกับ landing page ที่ไม่มีการบันทึก theme
+const theme = ref('light')
 const themeClass = computed(() => {
   return theme.value === 'dark' ? 'bg-gray-950 text-white' : 'bg-white text-gray-950'
 })
-
 const toggleTheme = () => {
-  theme.value = theme.value === 'dark' ? 'light' : 'dark'
-  document.body.classList.toggle('dark', theme.value === 'dark')
-  localStorage.setItem('theme', theme.value)
+  theme.value = theme.value === 'dark' ? 'light' : 'dark'
+  document.body.classList.toggle('dark', theme.value === 'dark')
+  localStorage.setItem('theme', theme.value)
 }
 
 const iconComponent = computed(() => {
-  return theme.value === 'dark'
-    ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>` // sun icon
-    : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>` // moon icon
+  return theme.value === 'dark'
+  ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>` // sun icon
+  : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>` // moon icon
 })
+
+// Add new refs for dropdown open state
+const showBrandDropdown = ref(false);
+const showPriceDropdown = ref(false);
+const showStorageDropdown = ref(false);
+
+// Function to close all dropdowns
+const closeAllDropdowns = () => {
+  showBrandDropdown.value = false;
+  showPriceDropdown.value = false;
+  showStorageDropdown.value = false;
+};
+
+// Function to handle clicks outside the dropdowns
+const handleOutsideClick = (event) => {
+  // Check if the click is outside the brand dropdown
+  if (showBrandDropdown.value && !event.target.closest('.itbms-filter-brand-dropdown')) {
+    showBrandDropdown.value = false;
+  }
+  // Check if the click is outside the price dropdown
+  if (showPriceDropdown.value && !event.target.closest('.itbms-filter-price-dropdown')) {
+    showPriceDropdown.value = false;
+  }
+  // Check if the click is outside the storage dropdown
+  if (showStorageDropdown.value && !event.target.closest('.itbms-filter-storage-dropdown')) {
+    showStorageDropdown.value = false;
+  }
+};
+
+// --- START: Added code to display filter chips ---
+const activeFilters = computed(() => {
+  const filters = [];
+  selectedBrands.value.forEach(brand => {
+    filters.push({ type: 'brand', value: brand });
+  });
+  selectedPrices.value.forEach(price => {
+    filters.push({ type: 'price', value: price });
+  });
+  selectedStorages.value.forEach(storage => {
+    filters.push({ type: 'storage', value: storage });
+  });
+  return filters;
+});
+
+const removeFilter = (filter) => {
+  if (filter.type === 'brand') {
+    selectedBrands.value = selectedBrands.value.filter(b => b !== filter.value);
+  } else if (filter.type === 'price') {
+    selectedPrices.value = selectedPrices.value.filter(p => p !== filter.value);
+  } else if (filter.type === 'storage') {
+    selectedStorages.value = selectedStorages.value.filter(s => s !== filter.value);
+  }
+};
+// --- END: Added code to display filter chips ---
 
 // Fetch
 async function fetchItems() {
@@ -59,6 +138,8 @@ async function fetchItems() {
     const response = await getItems('http://localhost:8080/itb-mshop/v2/sale-items', {
       params: {
         filterBrands: selectedBrands.value.length ? selectedBrands.value : undefined,
+        filterPrices: selectedPrices.value.length ? selectedPrices.value : undefined,
+        filterStorages: selectedStorages.value.length ? selectedStorages.value : undefined,
         page: currentPage.value,
         size: pageSize.value,
         sortField: currentSortOrder.value === 'createdOn' ? 'id' : 'brand.name',
@@ -99,10 +180,9 @@ async function fetchbrand() {
 }
 
 watch(
-  [selectedBrands, searchQuery],
+  [selectedBrands, selectedPrices, selectedStorages, searchQuery],
   () => {
     currentPage.value = 0
-    lastAction.value = ''
     fetchItems()
   }
 )
@@ -117,6 +197,14 @@ watch(pageSize, (newSize) => {
 
 watch(selectedBrands, (newVal) => {
   sessionStorage.setItem('selectedBrands', JSON.stringify(newVal))
+})
+
+watch(selectedPrices, (newVal) => {
+  sessionStorage.setItem('selectedPrices', JSON.stringify(newVal))
+})
+
+watch(selectedStorages, (newVal) => {
+  sessionStorage.setItem('selectedStorages', JSON.stringify(newVal))
 })
 
 watch(currentSortOrder, (val) => {
@@ -174,14 +262,13 @@ const visiblePages = computed(() => {
   return pages
 })
 
-
 // Pagination
 function goToPage(page) {
   currentPage.value = page
   fetchItems()
 }
 
-//edit
+// Edit
 const goToEditItem = (id) => {
   router.push(`/sale-items/${id}/edit`)
 }
@@ -210,16 +297,10 @@ watch(pageSize, () => {
 })
 
 // Filter
-function toggleBrandFilterModal() {
-  showBrandFilterModal.value = !showBrandFilterModal.value
-}
-function removeBrandFromFilter(brand) {
-  selectedBrands.value = selectedBrands.value.filter(b => b !== brand)
-  currentPage.value = 0
-  fetchItems()
-}
-function clearAllBrandFilters() {
+function clearAllFilters() {
   selectedBrands.value = []
+  selectedPrices.value = []
+  selectedStorages.value = []
   currentPage.value = 0
   fetchItems()
 }
@@ -235,19 +316,18 @@ const goToPhoneDetails = (id) => {
   router.push(`/sale-items/${id}`)
 }
 
-// Watch fetch trigger
-watch([searchQuery, selectedBrands, currentSortOrder, currentPage], fetchItems, { immediate: true })
-
 onMounted(() => {
   fetchItems()
   fetchbrand()
 
-  // Load theme from localStorage on component mount
   const savedTheme = localStorage.getItem('theme')
   if (savedTheme) {
     theme.value = savedTheme
   }
   document.body.classList.toggle('dark', theme.value === 'dark')
+
+  // Add event listener for clicks outside the dropdowns
+  document.addEventListener('click', handleOutsideClick);
 })
 
 // --- Delete Item Functions ---
@@ -339,10 +419,8 @@ watch(
 
 <template>
   <div :class="themeClass" class="itbms-sale-items-page min-h-screen font-sans overflow-hidden">
-
     <div class="container mx-auto py-8 px-6 md:px-0 flex flex-col md:flex-row items-center justify-between gap-4">
       <div class="itbms-logo font-extrabold text-3xl">ITB MShop</div>
-      
       <div class="flex-grow flex flex-col md:flex-row items-center gap-4 w-full md:w-auto">
         <div class="itbms-search-bar flex items-center rounded-full border focus-within:border-orange-500 w-full md:max-w-md" :class="theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-white'">
           <input type="text" placeholder="Search..." v-model="searchQuery" class="itbms-search-input py-2 px-4 w-full focus:outline-none rounded-l-full" :class="theme === 'dark' ? 'bg-gray-800 text-white placeholder-gray-400' : 'bg-white text-gray-950 placeholder-gray-500'" />
@@ -352,42 +430,9 @@ watch(
             </svg>
           </button>
         </div>
-
-        <div class="itbms-brand-filter flex items-center rounded-full border w-full md:max-w-sm" :class="theme === 'dark' ? 'border-gray-700 bg-gray-800' : 'border-gray-300 bg-white'">
-          <div class="flex flex-grow flex-wrap items-center gap-1 p-2 min-h-[40px] max-h-[40px] overflow-y-auto">
-            <span v-for="brand in selectedBrands" :key="brand" class="itbms-filter-item text-sm font-medium px-2.5 py-0.5 rounded-full flex items-center whitespace-nowrap" :class="theme === 'dark' ? 'bg-blue-800 text-blue-100' : 'bg-blue-100 text-blue-800'">
-              {{ brand }}
-              <button @click.stop="removeBrandFromFilter(brand)" class="itbms-filter-item-clear ml-1 focus:outline-none" :class="theme === 'dark' ? 'text-blue-200 hover:text-white' : 'text-blue-800 hover:text-blue-600'">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
-                </svg>
-              </button>
-            </span>
-            <input
-              type="text"
-              :placeholder="selectedBrands.length === 0 ? 'Filter by brand(s)' : ''"
-              readonly
-              class="itbms-brand-filter-input h-full w-full px-3 py-0 flex-grow focus:outline-none cursor-pointer"
-              :class="theme === 'dark' ? 'bg-gray-800 text-white placeholder-gray-400' : 'bg-white text-gray-950 placeholder-gray-500'"
-              @click="toggleBrandFilterModal"
-            />
-          </div>
-          <button @click="toggleBrandFilterModal" class="itbms-brand-filter-button p-2 transition-colors duration-300" :class="theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600 rounded-r-full' : 'bg-gray-100 hover:bg-gray-200 rounded-r-full'">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" :class="theme === 'dark' ? 'text-gray-300' : 'text-gray-600'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V19l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-          </button>
-          <button @click="clearAllBrandFilters()" class="itbms-brand-filter-clear text-white p-2 rounded-r-full transition-colors duration-300 border-2 border-red-500 hover:bg-red-600" :class="theme === 'dark' ? 'bg-red-500 hover:text-white' : 'bg-red-500 hover:text-white'">
-            Clear
-          </button>
-        </div>
       </div>
-      
       <div class="itbms-icons flex flex-col items-end space-y-2">
         <div class="flex items-center space-x-4">
-          <!-- <div @click="toggleTheme" class="itbms-theme-toggle cursor-pointer p-2 rounded-full transition-colors duration-300" :class="theme === 'dark' ? 'bg-gray-700 hover:bg-gray-600' : 'bg-gray-200 hover:bg-gray-300'" v-html="iconComponent">
-          </div> -->
-          
           <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 cursor-pointer" :class="theme === 'dark' ? 'text-white' : 'text-black'" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
@@ -397,36 +442,30 @@ watch(
         </div>
       </div>
     </div>
-    
     <div class="px-6 md:px-20 mt-8">
       <div class="flex flex-col md:flex-row items-start justify-between mb-6 gap-4">
         <div class="flex flex-wrap gap-4">
           <button
             class="itbms-sale-item-add border-2 rounded-full px-6 py-2 cursor-pointer transition-colors duration-300 font-semibold"
             :class="theme === 'dark' ? 'bg-green-500 text-white border-green-500 hover:bg-transparent hover:text-green-500' : 'bg-green-500 text-white border-green-500 hover:bg-transparent hover:text-green-500'"
-            @click="addSaleItemButton"
-          >
+            @click="addSaleItemButton">
             + Add Sell Item
           </button>
-          
           <button
             v-if="!isGridView"
             @click="goToManageBrand"
             class="itbms-manage-brand border-2 rounded-full px-6 py-2 cursor-pointer transition-colors duration-300 font-semibold"
-            :class="theme === 'dark' ? 'bg-blue-500 text-white border-blue-500 hover:bg-transparent hover:text-blue-500' : 'bg-blue-500 text-white border-blue-500 hover:bg-transparent hover:text-blue-500'"
-          >
+            :class="theme === 'dark' ? 'bg-blue-500 text-white border-blue-500 hover:bg-transparent hover:text-blue-500' : 'bg-blue-500 text-white border-blue-500 hover:bg-transparent hover:text-blue-500'">
             Manage Brand
           </button>
         </div>
-        
         <div class="flex items-center space-x-4">
           <button
             v-if="isGridView"
             @click="sortBrandAscending"
             class="itbms-brand-asc border-2 rounded-full px-4 py-2 cursor-pointer transition-colors duration-300"
             :class="[theme === 'dark' ? 'text-gray-300 border-gray-700 hover:bg-gray-700' : 'text-gray-600 border-gray-300 hover:bg-gray-100', currentSortOrder === 'brandAsc' ? 'bg-blue-500 text-white border-blue-500' : '']"
-            title="Sort by Brand Ascending"
-          >
+            title="Sort by Brand Ascending">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v9.75m0 0-3-3m3 3 3-3" />
             </svg>
@@ -438,8 +477,7 @@ watch(
             @click="sortBrandDescending"
             class="itbms-brand-desc border-2 rounded-full px-4 py-2 cursor-pointer transition-colors duration-300"
             :class="[theme === 'dark' ? 'text-gray-300 border-gray-700 hover:bg-gray-700' : 'text-gray-600 border-gray-300 hover:bg-gray-100', currentSortOrder === 'brandDesc' ? 'bg-blue-500 text-white border-blue-500' : '']"
-            title="Sort by Brand Descending"
-          >
+            title="Sort by Brand Descending">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5 4.5V8.25m0 0-3 3m-3-3-3 3" />
             </svg>
@@ -451,8 +489,7 @@ watch(
             @click="clearBrandSorting"
             class="itbms-brand-none border-2 rounded-full px-4 py-2 cursor-pointer transition-colors duration-300"
             :class="[theme === 'dark' ? 'text-gray-300 border-gray-700 hover:bg-gray-700' : 'text-gray-600 border-gray-300 hover:bg-gray-100', currentSortOrder === 'createdOn' ? 'bg-blue-500 text-white border-blue-500' : '']"
-            title="Clear Sort (Default: Created On)"
-          >
+            title="Clear Sort (Default: Created On)">
             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5a.75.75 0 0 0-1.5 0v7.5a.75.75 0 0 0 .75.75h4.5a.75.75 0 0 0 0-1.5h-3.75V4.5Z" />
               <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 12c0 5.66 4.62 10.25 10.25 10.25S22.75 17.66 22.75 12A10.25 10.25 0 0 0 12 1.75 10.07 10.07 0 0 0 4.25 4.5" />
@@ -462,15 +499,112 @@ watch(
         </div>
       </div>
     </div>
-    
+
+    <div class="itbms-filter-bar px-6 md:px-20 mb-6 flex flex-wrap items-center gap-4">
+      <div class="itbms-filter-brand-dropdown relative">
+        <details
+          class="itbms-dropdown-details"
+          :class="theme === 'dark' ? 'text-white' : 'text-gray-950'"
+          :open="showBrandDropdown"
+          @toggle="showBrandDropdown = $event.target.open"
+        >
+          <summary class="itbms-dropdown-summary p-2 border rounded-md cursor-pointer transition-colors duration-200" :class="theme === 'dark' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-300 hover:bg-gray-100'">
+            Brand ({{ selectedBrands.length }})
+          </summary>
+          <div class="itbms-dropdown-menu absolute z-10 mt-2 w-48 rounded-md shadow-lg p-2 max-h-48 overflow-y-auto" :class="theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-300'">
+            <div v-for="brand in availableBrands" :key="brand" class="flex items-center p-1">
+              <input
+                type="checkbox"
+                :id="'brand-' + brand"
+                :value="brand"
+                v-model="selectedBrands"
+                class="itbms-brand-checkbox h-4 w-4 rounded text-blue-600 focus:ring-blue-500" :class="theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'">
+              <label :for="'brand-' + brand" class="ml-2 text-sm font-medium">{{ brand }}</label>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="itbms-filter-price-dropdown relative">
+        <details
+          class="itbms-dropdown-details"
+          :class="theme === 'dark' ? 'text-white' : 'text-gray-950'"
+          :open="showPriceDropdown"
+          @toggle="showPriceDropdown = $event.target.open"
+        >
+          <summary class="itbms-dropdown-summary p-2 border rounded-md cursor-pointer transition-colors duration-200" :class="theme === 'dark' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-300 hover:bg-gray-100'">
+            Price ({{ selectedPrices.length }})
+          </summary>
+          <div class="itbms-dropdown-menu absolute z-10 mt-2 w-48 rounded-md shadow-lg p-2 max-h-48 overflow-y-auto" :class="theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-300'">
+            <div v-for="price in priceOptions" :key="price" class="flex items-center p-1">
+              <input
+                type="checkbox"
+                :id="'price-' + price"
+                :value="price"
+                v-model="selectedPrices"
+                class="itbms-price-checkbox h-4 w-4 rounded text-blue-600 focus:ring-blue-500" :class="theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'">
+              <label :for="'price-' + price" class="ml-2 text-sm font-medium">{{ price }}</label>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <div class="itbms-filter-storage-dropdown relative">
+        <details
+          class="itbms-dropdown-details"
+          :class="theme === 'dark' ? 'text-white' : 'text-gray-950'"
+          :open="showStorageDropdown"
+          @toggle="showStorageDropdown = $event.target.open"
+        >
+          <summary class="itbms-dropdown-summary p-2 border rounded-md cursor-pointer transition-colors duration-200" :class="theme === 'dark' ? 'bg-gray-800 border-gray-700 hover:bg-gray-700' : 'bg-white border-gray-300 hover:bg-gray-100'">
+            Storage ({{ selectedStorages.length }})
+          </summary>
+          <div class="itbms-dropdown-menu absolute z-10 mt-2 w-48 rounded-md shadow-lg p-2 max-h-48 overflow-y-auto" :class="theme === 'dark' ? 'bg-gray-800 border border-gray-700' : 'bg-white border border-gray-300'">
+            <div v-for="storage in storageOptions" :key="storage" class="flex items-center p-1">
+              <input
+                type="checkbox"
+                :id="'storage-' + storage"
+                :value="storage"
+                v-model="selectedStorages"
+                class="itbms-storage-checkbox h-4 w-4 rounded text-blue-600 focus:ring-blue-500" :class="theme === 'dark' ? 'bg-gray-700 border-gray-600' : 'bg-gray-100 border-gray-300'">
+              <label :for="'storage-' + storage" class="ml-2 text-sm font-medium">{{ storage }}</label>
+            </div>
+          </div>
+        </details>
+      </div>
+
+      <button
+        @click="clearAllFilters"
+        class="itbms-clear-all-filters p-2 border-2 rounded-md transition-colors duration-300"
+        :class="theme === 'dark' ? 'text-white border-red-500 hover:bg-red-500' : 'text-red-500 border-red-500 hover:bg-red-500 hover:text-white'">
+        Clear All
+      </button>
+    </div>
+
+<div v-if="activeFilters.length" class="itbms-active-filters px-6 md:px-20 mb-6">
+  <div class="flex flex-wrap items-center gap-2">
+    <span class="font-semibold" :class="theme === 'dark' ? 'text-gray-300' : 'text-gray-700'">Filters:</span>
+    <div
+      v-for="(filter, index) in activeFilters"
+      :key="index"
+      class="flex items-center space-x-1 border rounded-full px-3 py-1 text-sm font-medium"
+      :class="theme === 'dark' ? 'bg-gray-700 border-gray-600 text-white' : 'bg-gray-200 border-gray-300 text-gray-900'">
+      <span>{{ filter.value }}</span>
+      <button @click="removeFilter(filter)" class="itbms-remove-filter-button">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</div>
     <div class="px-6 md:px-20 mb-6 flex items-center gap-3">
       <label for="page-size" class="text-sm font-medium">Items per page:</label>
       <select
         id="page-size"
         v-model="pageSize"
         class="itbms-page-size border-2 rounded-full px-3 py-1 text-sm font-semibold shadow-sm transition duration-200 focus:outline-none focus:ring-2"
-        :class="theme === 'dark' ? 'bg-gray-800 text-gray-300 border-gray-700 focus:ring-orange-500 hover:bg-gray-700' : 'bg-white text-gray-800 border-gray-300 focus:ring-blue-400 hover:bg-gray-100'"
-      >
+        :class="theme === 'dark' ? 'bg-gray-800 text-gray-300 border-gray-700 focus:ring-orange-500 hover:bg-gray-700' : 'bg-white text-gray-800 border-gray-300 focus:ring-blue-400 hover:bg-gray-100'">
         <option :value="5">5</option>
         <option :value="10">10</option>
         <option :value="20">20</option>
@@ -487,13 +621,11 @@ watch(
             class="itbms-row rounded-3xl p-6 shadow-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl cursor-pointer"
             :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-950'"
             :style="{ animationDelay: (index * 50) + 'ms' }"
-            @click="goToPhoneDetails(item.id)"
-          >
+            @click="goToPhoneDetails(item.id)">
             <img
-              :src="'/phone/SidePhone.jpg'"
+              :src="'/phone/iPhone.png'"
               alt="phone"
-              class="w-full h-40 object-contain mb-4 rounded-xl"
-            />
+              class="w-full h-40 object-contain mb-4 rounded-xl" />
             <div class="itbms-brand font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500">{{ item.brandName }}</div>
             <div class="itbms-model text-sm font-semibold">{{ item.model }}</div>
             <div class="text-sm">
@@ -525,8 +657,7 @@ watch(
               v-for="item in items"
               :key="item.id"
               class="itbms-row transition-colors duration-200"
-              :class="theme === 'dark' ? 'bg-gray-900 text-gray-200 hover:bg-gray-800' : 'bg-white text-gray-800 hover:bg-gray-100'"
-            >
+              :class="theme === 'dark' ? 'bg-gray-900 text-gray-200 hover:bg-gray-800' : 'bg-white text-gray-800 hover:bg-gray-100'">
               <td class="px-4 py-3">{{ item.id }}</td>
               <td class="px-4 py-3">{{ item.brandName }}</td>
               <td class="px-4 py-3">{{ item.model }}</td>
@@ -538,15 +669,13 @@ watch(
                 <button
                   @click.stop="goToEditItem(item.id)"
                   class="itbms-edit-button font-semibold border-2 rounded-full px-4 py-1 transition-colors duration-300"
-                  :class="theme === 'dark' ? 'bg-yellow-500 text-white border-yellow-500 hover:bg-transparent hover:text-yellow-500' : 'bg-yellow-500 text-white border-yellow-500 hover:bg-transparent hover:text-yellow-500'"
-                >
+                  :class="theme === 'dark' ? 'bg-yellow-500 text-white border-yellow-500 hover:bg-transparent hover:text-yellow-500' : 'bg-yellow-500 text-white border-yellow-500 hover:bg-transparent hover:text-yellow-500'">
                   Edit
                 </button>
                 <button
                   @click.stop="deleteproduct(item)"
                   class="itbms-delete-button font-semibold border-2 rounded-full px-4 py-1 transition-colors duration-300"
-                  :class="theme === 'dark' ? 'bg-red-500 text-white border-red-500 hover:bg-transparent hover:text-red-500' : 'bg-red-500 text-white border-red-500 hover:bg-transparent hover:text-red-500'"
-                >
+                  :class="theme === 'dark' ? 'bg-red-500 text-white border-red-500 hover:bg-transparent hover:text-red-500' : 'bg-red-500 text-white border-red-500 hover:bg-transparent hover:text-red-500'">
                   Delete
                 </button>
               </td>
@@ -693,8 +822,8 @@ watch(
     <transition name="bounce-popup">
       <div v-if="showfailPopup" class="itbms-bg fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="p-6 rounded-3xl shadow-lg text-center" :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-950'">
-          <h2 class="text-xl font-semibold mb-4">Error 500!</h2>
-          <p class="itbms-message mb-4">The sale item has been Fail added!</p>
+          <h2 class="text-xl font-semibold mb-4">The sale item has been Fail added!</h2>
+          <p class="itbms-message mb-4">Please try again later.</p>
           <button @click="closeSuccessPopup" class="bg-red-500 text-white border-2 border-red-500 rounded-full px-6 py-2 transition-colors duration-300 hover:bg-transparent hover:text-red-500 font-semibold">Done</button>
         </div>
       </div>

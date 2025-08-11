@@ -1,12 +1,12 @@
 // src/router/index.js
 import { createRouter, createWebHistory } from 'vue-router'
-import LandingPage from '../components/InterfaceUI/LandingPage.vue'
-import SaleItemsPage from '../components/Containers/SaleItemsPage.vue'
-import SaleItemsDetailPage from '@/components/Containers/SaleItemsDetailPage.vue'
-import PageNotFound from '@/components/InterfaceUI/Page404.vue'
-import ListingPage from '../components/Containers/ListBrandPage.vue'
-import SaleItemsAdd from '@/components/Containers/SaleItemsAdd.vue'
-import BrandAdd from '@/components/Containers/BrandAdd.vue'
+import LandingPage from '../components/LandingPage.vue'
+import SaleItemsPage from '../components/SaleItemsPage.vue'
+import SaleItemsDetailPage from '@/components/SaleItemsDetailPage.vue'
+import PageNotFound from '@/components/Page404.vue'
+import ListingPage from '../components/ListBrandPage.vue'
+import SaleItemsAdd from '@/components/SaleItemsAdd.vue'
+import BrandAdd from '@/components/BrandAdd.vue'
 
 const routes = [
   {

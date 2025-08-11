@@ -19,8 +19,8 @@ const product = ref({
     quantity: '',
 })
 
-const imageList = ref(['/phone/iPhone.jpg', '/phone/iPhone2.jpg','/phone/iPhone3.jpg','/phone/iPhone4.jpg'])
-const mainImage = ref('/phone/iPhone.jpg')
+const imageList = ref(['/phone/iPhone.png', '/phone/iPhone2.jpg','/phone/iPhone3.jpg','/phone/iPhone4.jpg'])
+const mainImage = ref('/phone/iPhone.png')
 const responseMessage = ref('')
 const originalProduct = ref(null)
 const addnewitemMessage = ref('New Sale Item') // แก้คำว่า ltem เป็น Item
@@ -362,7 +362,7 @@ if (isEditMode.value) {
             newProduct
         );
 
-        if (!result || result.status === 'error' || !result.id) {
+        if (result.status !== 200 || !result.data?.id) {
             throw new Error('Edit failed or invalid data returned');
         }
 
@@ -389,7 +389,7 @@ if (isEditMode.value) {
             newProduct
         );
 
-        if (!result || result.status === 'error' || !result.id) {
+        if (result.status !== 201 || !result.data?.id) {
             throw new Error('Add failed or invalid data returned');
         }
 
@@ -443,7 +443,7 @@ const cancelAddItem = () => {
             <div>
                 <div class="relative w-full overflow-hidden rounded-xl shadow-lg mb-4">
                     <img :src="mainImage" alt="Main Image"
-                        class="rounded-lg w-full h-96 object-cover transition-transform duration-500 hover:scale-105" />
+                        class="ltbms-product-image w-full h-96 object-contain transition-transform duration-500 hover:scale-105" />
                 </div>
                 <div class="flex gap-3 justify-center md:justify-start overflow-x-auto pb-2">
                     <img v-for="(img, index) in imageList" :key="index" :src="img"

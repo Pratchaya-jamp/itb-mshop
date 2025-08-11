@@ -8,7 +8,7 @@ const contact = ref(null)
 const randomSaleItems = ref([])
 const slidePosition = ref(0) // ตำแหน่งการสไลด์
 let slideInterval = null // ตัวแปรสำหรับเก็บ interval
-const mainImage = ref("/phone/iPhone.jpg")
+const mainImage = ref("/phone/iPhone.png")
 
 const theme = ref(localStorage.getItem('theme') || 'dark')
 
@@ -37,6 +37,10 @@ const fetchRandomSaleItems = async () => {
     } catch (error) {
         console.error('Error fetching sale items:', error)
     }
+}
+
+const formatPrice = (price) => {
+    return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
 // ฟังก์ชันสำหรับเลื่อนสไลด์
@@ -154,7 +158,7 @@ const goToPhoneDetails = (id) => {
     </div>
 
     <div ref="services" :class="theme === 'dark' ? 'bg-gray-900 text-gray-200' : 'bg-gray-100 text-gray-800'" class="features-section px-6 md:px-20 py-24 rounded-t-[5rem] -mt-16 relative z-20">
-      <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">Interested Product</h2>
+      <h2 class="text-4xl md:text-5xl font-bold text-center mb-16">Interested Products</h2>
       
       <div class="overflow-hidden relative w-full mb-16">
         <div class="flex transition-transform duration-1000 ease-in-out" :style="{ transform: carouselTransform }">
@@ -164,9 +168,9 @@ const goToPhoneDetails = (id) => {
             <img :src="mainImage" :alt="item.productName" class="w-48 h-48 object-contain mb-4 rounded-xl"/>
             <div class="text-center">
               <h3 class="text-2xl font-bold mb-1">{{ item.model }}</h3>
-              <p class="text-lg mb-1" :class="theme === 'dark' ? 'text-gray-400' : 'text-gray-600'">Brand: {{ item.brandName }}</p>
+              <p class="text-lg mb-1" :class="theme === 'dark' ? 'text-gray-400' : 'text-gray-600'">{{ item.brandName }}</p>
               <p class="text-lg mb-2" :class="theme === 'dark' ? 'text-gray-400' : 'text-gray-600'">Storage: {{ item.storageGb }} GB / RAM: {{ item.ramGb }} GB</p>
-              <p class="text-2xl font-bold text-orange-500">{{ item.price }} ฿</p>
+              <p class="text-2xl font-bold text-orange-500">{{ formatPrice(item.price) }} ฿</p>
             </div>
             <button class="mt-4 px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300"
              @click="goToPhoneDetails(item.id)"

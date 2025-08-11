@@ -25,7 +25,7 @@ onMounted(async () => {
   // เพิ่ม event listener เพื่อฟังการเปลี่ยนแปลงของ localStorage จากหน้าอื่น
   window.addEventListener('storage', (event) => {
     if (event.key === 'theme') {
-      theme.value = event.newValue || 'dark';
+      theme.value = event.newValue;
     }
   });
 
@@ -46,11 +46,11 @@ watch(theme, (newTheme) => {
 
 // โค้ดส่วนอื่นๆ ที่เกี่ยวกับ Theme ยังคงเดิม
 const themeClass = computed(() => (theme.value === 'dark' ? 'dark bg-gray-900 text-white' : 'light bg-white text-gray-950'))
-const iconComponent = computed(() => 
-  theme.value === 'dark' 
-    ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" /></svg>` 
-    : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>`
-)
+const iconComponent = computed(() => {
+  return theme.value === 'dark'
+    ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-200" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>` // sun icon
+    : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-800" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>` // moon icon
+})
 
 const router = useRouter()
 const route = useRoute()
@@ -398,7 +398,7 @@ watch([pageSize, searchQuery], () => {
             :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-950'"
             :style="{ animationDelay: (index * 50) + 'ms' }"
           >
-            <img :src="`logobrands/${item.id}.png`" alt="brand" class="w-full h-40 object-contain mb-4 rounded-xl" />
+            <img :src="`/logobrands/${item.id}.png`" alt="brand" class="w-full h-40 object-contain mb-4 rounded-xl" />
             <div class="itbms-brand font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500 text-center">{{ item.brandName }}</div>
           </div>
         </div>
@@ -425,7 +425,7 @@ watch([pageSize, searchQuery], () => {
               <td class="px-4 py-3">
                 <div class="flex items-center space-x-3">
                   <img
-                    :src="`logobrands/${item.id}.png`"
+                    :src="`/sy4/logobrands/${item.id}.png`"
                     alt="brand"
                     class="w-10 h-10 object-contain rounded-xl"
                   />
@@ -592,8 +592,8 @@ watch([pageSize, searchQuery], () => {
     <transition name="bounce-popup">
       <div v-if="showEditFailPopup" class="itbms-bg fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="p-6 rounded-3xl shadow-lg text-center" :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-950'">
-          <h2 class="text-xl font-semibold mb-4">Error 500!</h2>
-          <p class="itbms-message mb-4">The brand has been fail to updated!</p>
+          <h2 class="text-xl font-semibold mb-4">The brand has been fail to Edit!</h2>
+          <p class="itbms-message mb-4">Please try again later.</p>
           <button @click="closeSuccessPopup" class="bg-red-500 text-white border-2 border-red-500 rounded-full px-6 py-2 transition-colors duration-300 hover:bg-transparent hover:text-red-500 font-semibold">Done</button>
         </div>
       </div>
@@ -602,8 +602,8 @@ watch([pageSize, searchQuery], () => {
     <transition name="bounce-popup">
       <div v-if="showfailPopup" class="itbms-bg fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-50">
         <div class="p-6 rounded-3xl shadow-lg text-center" :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-gray-950'">
-          <h2 class="text-xl text-red-500 font-semibold mb-4">Error 500!</h2>
-          <p class="itbms-message mb-4">The status could not be added.</p>
+          <h2 class="text-xl text-red-500 font-semibold mb-4">The brand has been fail to added!</h2>
+          <p class="itbms-message mb-4">Please try again later.</p>
           <button @click="closeSuccessPopup" class="bg-red-500 text-white border-2 border-red-500 rounded-full px-6 py-2 transition-colors duration-300 hover:bg-transparent hover:text-red-500 font-semibold">Done</button>
         </div>
       </div>
