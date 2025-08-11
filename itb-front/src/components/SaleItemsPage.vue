@@ -693,7 +693,7 @@ watch(
         :class="[
           currentPage === 0
             ? 'bg-gray-700 text-gray-400 border-gray-700 opacity-70 cursor-not-allowed'
-            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600'
+            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600 hover:cursor-pointer'
         ]"
       >
         &lt;&lt; First
@@ -706,7 +706,7 @@ watch(
         :class="[
           currentPage === 0
             ? 'bg-gray-700 text-gray-400 border-gray-700 opacity-70 cursor-not-allowed'
-            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600'
+            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600 hover:cursor-pointer'
         ]"
       >
         &lt; Prev
@@ -721,8 +721,8 @@ watch(
           currentPage === page - 1
             ? 'bg-gradient-to-r from-orange-500 to-red-500 text-white shadow-lg'
             : theme === 'dark'
-            ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-            : 'bg-white text-gray-800 hover:bg-gray-100'
+            ? 'bg-gray-800 text-gray-300 hover:bg-gray-700 hover:cursor-pointer'
+            : 'bg-white text-gray-800 hover:bg-gray-100 hover:cursor-pointer'
         ]"
       >
         {{ page }}
@@ -735,7 +735,7 @@ watch(
         :class="[
           currentPage === totalPages - 1
             ? 'bg-gray-700 text-gray-400 border-gray-700 opacity-70 cursor-not-allowed'
-            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600'
+            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600 hover:cursor-pointer'
         ]"
       >
         Next &gt;
@@ -748,7 +748,7 @@ watch(
         :class="[
           currentPage === totalPages - 1
             ? 'bg-gray-700 text-gray-400 border-gray-700 opacity-70 cursor-not-allowed'
-            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600'
+            : 'bg-gradient-to-r from-orange-500 to-red-500 text-white border-transparent hover:from-orange-600 hover:to-red-600 hover:cursor-pointer'
         ]"
       >
         Last &gt;&gt;
