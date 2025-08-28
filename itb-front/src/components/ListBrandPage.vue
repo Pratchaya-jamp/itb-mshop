@@ -30,9 +30,9 @@ onMounted(async () => {
   });
 
   try {
-    const data = await getItems('http://localhost:8080/itb-mshop/v1/brands')
+    const data = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands')
     items.value = data.sort((a, b) => a.id - b.id)
-    const saleItemsData = await getItems('http://localhost:8080/itb-mshop/v1/sale-items')
+    const saleItemsData = await getItems('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items')
     saleItems.value = saleItemsData
   } catch (err) {
     console.error('Error loading items:', err)
@@ -182,7 +182,7 @@ const confirmDelete = async () => {
 
   isDeleting.value = true
   try {
-    const statusCode = await deleteItemById('http://localhost:8080/itb-mshop/v1/brands', deleteId.value);
+    const statusCode = await deleteItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/brands', deleteId.value);
     if (statusCode === 204) {
       setTimeout(() => {
         isDeleting.value = false
@@ -398,7 +398,7 @@ watch([pageSize, searchQuery], () => {
             :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-100 text-gray-950'"
             :style="{ animationDelay: (index * 50) + 'ms' }"
           >
-            <img :src="`/logobrands/${item.id}.png`" alt="brand" class="w-full h-40 object-contain mb-4 rounded-xl" />
+            <img :src="`/sy4/logobrands/${item.id}.png`" alt="brand" class="w-full h-40 object-contain mb-4 rounded-xl" />
             <div class="itbms-brand font-bold text-lg text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-pink-500 text-center">{{ item.brandName }}</div>
           </div>
         </div>

@@ -11,22 +11,59 @@ import java.util.List;
 
 public interface SaleItemBaseRepo extends JpaRepository<SaleItemBase, Integer> {
 
-    @Query("""
+
+
+//     @Query("""
+//
+//             SELECT s FROM SaleItemBase s
+//    JOIN s.brand b
+//    WHERE (:brands IS NULL OR LOWER(b.name) IN :brands)
+//      AND(
+//           (:storages IS NULL AND :storageIsNull = false)
+//        OR (:storages IS NOT NULL AND s.storageGb IN :storages)
+//        OR (:storageIsNull = true AND s.storageGb IS NULL)
+//      )
+//      AND (
+//           (:priceLower IS NULL OR :priceUpper IS NULL)
+//        OR (s.price BETWEEN :priceLower AND :priceUpper)
+//      )
+//    """)
+//     Page<SaleItemBase> findWithFilters(
+//             @Param("brands") List<String> brands,
+//             @Param("storages") List<Integer> storages,
+//             @Param("storageIsNull") boolean storageIsNull,
+//             @Param("priceLower") Integer priceLower,
+//             @Param("priceUpper") Integer priceUpper,
+//             Pageable pageable
+//     );
+
+     @Query("""
         SELECT s FROM SaleItemBase s
         JOIN s.brand b
         WHERE (:brands IS NULL OR LOWER(b.name) IN :brands)
-          AND (:storages IS NULL OR s.storageGb IN :storages)
           AND (
-               :priceLower IS NULL OR :priceUpper IS NULL 
-               OR s.price BETWEEN :priceLower AND :priceUpper
+               (:storages IS NULL AND :storageIsNull = false) 
+            OR (:storages IS NOT NULL AND s.storageGb IN :storages)
+            OR (:storageIsNull = true AND s.storageGb IS NULL)
           )
-    """)
-    Page<SaleItemBase> findWithFilters(
-            @Param("brands") List<String> brands,
-            @Param("storages") List<Integer> storages,
-            @Param("priceLower") Integer priceLower,
-            @Param("priceUpper") Integer priceUpper,
-            Pageable pageable
-    );
+          AND (
+               (:priceLower IS NULL OR :priceUpper IS NULL)
+            OR (s.price BETWEEN :priceLower AND :priceUpper)
+          )
+          AND (
+               :keyword IS NULL
+            OR LOWER(s.description) LIKE %:keyword%
+            OR LOWER(s.model) LIKE %:keyword%
+            OR LOWER(s.color) LIKE %:keyword%
+          )
+        """)
+     Page<SaleItemBase> findWithFilters(
+             @Param("brands") List<String> brands,
+             @Param("storages") List<Integer> storages,
+             @Param("storageIsNull") boolean storageIsNull,
+             @Param("priceLower") Integer priceLower,
+             @Param("priceUpper") Integer priceUpper,
+             @Param("keyword") String keyword,
+             Pageable pageable
+     );
 }
-

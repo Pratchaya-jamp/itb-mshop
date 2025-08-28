@@ -9,8 +9,11 @@ const router = useRouter()
 const product = ref(null)
 const id = route.params.id
 
-const imageList = ref(['/phone/iPhone.png', '/phone/iPhone2.jpg', '/phone/iPhone3.jpg', '/phone/iPhone4.jpg'])
-const mainImage = ref('/phone/iPhone.png')
+const imageLoading = ref(true);
+const imageError = ref(false);
+const productImages = ref([])
+
+const mainImage = ref('')
 const showNotFoundPopup = ref(false)
 const isDeleting = ref(false)
 const showDeleteConfirmationPopup = ref(false)
@@ -46,9 +49,27 @@ const toggleTheme = () => {
     applyTheme(newTheme)
 }
 
+// function handleProductImages(images) {
+//     if (!images) return
+//     productImages.value = images
+//         .sort((a, b) => a.imageViewOrder - b.imageViewOrder) // จัดเรียงตามลำดับ
+//         .map(img => `/sy4/product-images/${img.fileName}`) // ชี้ไปที่โฟลเดอร์ public
+// }
+
+const handleMainImageError = () => {
+    imageError.value = true;
+    imageLoading.value = false;
+
+    // ลองใช้รูปภาพสำรอง
+    if (mainImage.value !== '/sy4/phone/iPhone.png') {
+        mainImage.value = '/sy4/phone/iPhone.png';
+        imageLoading.value = true;
+    }
+};
+
 onMounted(async () => {
     try {
-        const data = await getItemById('http://localhost:8080/itb-mshop/v1/sale-items', id)
+        const data = await getItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items', id)
         if (!data || data?.status === 404) {
             showNotFoundPopup.value = true
             startCountdown()
@@ -57,7 +78,17 @@ onMounted(async () => {
             }, 3000)
             return
         }
+
         product.value = data
+        if (data.saleItemImages && data.saleItemImages.length > 0) {
+            const sortedImages = data.saleItemImages
+                .sort((a, b) => a.imageViewOrder - b.imageViewOrder)
+                .map(img => `http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v2/sale-items/images/${img.fileName}`)
+      
+            productImages.value = sortedImages
+            mainImage.value = sortedImages[0]
+        }
+
     } catch (error) {
         console.error('Failed to fetch product:', error)
         showNotFoundPopup.value = true
@@ -73,6 +104,13 @@ onMounted(async () => {
     }
 })
 
+watch(() => mainImage.value, (newVal) => {
+    if (newVal) {
+        imageLoading.value = true;
+        imageError.value = false;
+    }
+})
+
 watch(
     () => route.query.editSuccess,
     (editSuccess) => {
@@ -81,6 +119,7 @@ watch(
                 showEditSuccessPopup.value = true
             }, 200)
             router.replace({ path: route.path, query: {} })
+            //router.go(0)
         }
     },
     { immediate: true }
@@ -107,7 +146,7 @@ const confirmDelete = async () => {
     showDeleteConfirmationPopup.value = false
     isDeleting.value = true
     try {
-        const statusCode = await deleteItemById('http://localhost:8080/itb-mshop/v1/sale-items', id)
+        const statusCode = await deleteItemById('http://intproj24.sit.kmutt.ac.th/sy4/itb-mshop/v1/sale-items', id)
         if (statusCode === 204) {
             setTimeout(() => {
                 isDeleting.value = false
@@ -134,14 +173,14 @@ const cancelDeleteItem = () => {
 
 const themeClass = computed(() => {
     return theme.value === 'dark'
-      ? 'bg-gray-950 text-white'
-      : 'bg-white text-gray-950'
+        ? 'bg-gray-950 text-white'
+        : 'bg-white text-gray-950'
 })
 
 const iconComponent = computed(() => {
     return theme.value === 'dark'
-      ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>` // sun icon
-      : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>` // moon icon
+        ? `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>` // sun icon
+        : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>` // moon icon
 })
 </script>
 
@@ -159,21 +198,32 @@ const iconComponent = computed(() => {
             </span>
         </nav>
 
-        <div
-            class="ltbms-product-detail grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 p-6 rounded-2xl shadow-xl max-w-6xl mx-auto transition-colors duration-500"
+        <div class="ltbms-product-detail grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 p-6 rounded-2xl shadow-xl max-w-6xl mx-auto transition-colors duration-500"
             :class="theme === 'dark' ? 'bg-gray-900' : 'bg-white'">
             <div class="flex flex-col">
-                <div class="relative w-full overflow-hidden rounded-xl shadow-lg mb-4">
-                    <img :src="mainImage" alt="Product Image"
-                        class="ltbms-product-image w-full h-96 object-contain transition-transform duration-500 hover:scale-105" />
+                <!-- Main Product Image -->
+                <div class="relative w-full aspect-[4/3] overflow-hidden rounded-xl shadow-lg mb-4 bg-gray-100">
+                    <img :src="mainImage"
+                        :alt="product?.model ? `${product?.brandName} ${product?.model}` : 'Product image'"
+                        class="w-full h-full object-contain transition-transform duration-500 hover:scale-105"
+                        @load="imageLoading = false" @error="handleMainImageError" />
                 </div>
-                <div class="flex gap-3 justify-center md:justify-start overflow-x-auto pb-2">
-                    <img v-for="(img, index) in imageList" :key="index" :src="img"
-                        class="ltbms-product-thumbnail w-20 h-20 object-cover rounded-lg cursor-pointer border-2 shadow-sm transition-all duration-300"
-                        :class="{
-                            'border-blue-500 scale-105': img === mainImage,
-                            'border-transparent hover:border-gray-400': img !== mainImage
-                        }" @click="mainImage = img" />
+
+                <!-- Thumbnail Gallery -->
+                <div v-if="productImages.length > 0"
+                    class="flex gap-3 px-4 justify-start overflow-x-auto pb-4 scrollbar-thin">
+
+                    <div v-for="(img, index) in productImages" :key="`thumbnail-${index}`"
+                        class="relative flex-shrink-0" @click="mainImage = img; mainImageError = false">
+
+                        <img :src="img"
+                            :alt="`${product?.brandName || ''} ${product?.model || ''} - ภาพที่ ${index + 1}`"
+                            class="w-20 h-20 object-cover rounded-lg cursor-pointer border-2 shadow-sm transition-all duration-300"
+                            :class="{
+                                'border-blue-500 scale-105': img === mainImage,
+                                'border-transparent hover:border-gray-300': img !== mainImage
+                            }" />
+                    </div>
                 </div>
             </div>
 
@@ -197,9 +247,9 @@ const iconComponent = computed(() => {
                 </div>
 
                 <div class="itbms-price text-4xl font-extrabold text-blue-500 mb-4">
-                    <span
-                        :class="{ 'text-gray-400': product?.price === null || product?.price === undefined }">
-                        {{ product?.price !== null && product?.price !== undefined ? product?.price.toLocaleString() : '-' }}
+                    <span :class="{ 'text-gray-400': product?.price === null || product?.price === undefined }">
+                        {{ product?.price !== null && product?.price !== undefined ? product?.price.toLocaleString() :
+                            '-' }}
                     </span>
                     <span class="text-xl font-normal ml-1">฿</span>
                 </div>
@@ -212,24 +262,21 @@ const iconComponent = computed(() => {
                 <div class="grid grid-cols-2 gap-4">
                     <div class="itbms-ramGb">
                         <strong class="font-semibold block text-gray-500 mb-1">RAM</strong>
-                        <span class="text-xl font-semibold"
-                            :class="{ 'text-gray-400': !product?.ramGb }">
+                        <span class="text-xl font-semibold" :class="{ 'text-gray-400': !product?.ramGb }">
                             {{ product?.ramGb || '-' }}
                             <span class="text-base font-normal">GB</span>
                         </span>
                     </div>
                     <div class="itbms-storageGb">
                         <strong class="font-semibold block text-gray-500 mb-1">Storage</strong>
-                        <span class="text-xl font-semibold"
-                            :class="{ 'text-gray-400': !product?.storageGb }">
+                        <span class="text-xl font-semibold" :class="{ 'text-gray-400': !product?.storageGb }">
                             {{ product?.storageGb || '-' }}
                             <span class="text-base font-normal">GB</span>
                         </span>
                     </div>
                     <div class="itbms-screenSizeInch">
                         <strong class="font-semibold block text-gray-500 mb-1">Screen Size</strong>
-                        <span class="text-xl font-semibold"
-                            :class="{ 'text-gray-400': !product?.screenSizeInch }">
+                        <span class="text-xl font-semibold" :class="{ 'text-gray-400': !product?.screenSizeInch }">
                             {{ product?.screenSizeInch || '-' }}
                             <span class="text-base font-normal">Inches</span>
                         </span>
@@ -238,7 +285,8 @@ const iconComponent = computed(() => {
                         <strong class="font-semibold block text-gray-500 mb-1">Available</strong>
                         <span class="text-xl font-semibold"
                             :class="{ 'text-green-500': product?.quantity > 0, 'text-red-500': product?.quantity <= 0 }">
-                            {{ product?.quantity !== null && product?.quantity !== undefined ? product?.quantity : '-' }}
+                            {{ product?.quantity !== null && product?.quantity !== undefined ? product?.quantity : '-'
+                            }}
                             <span class="text-base font-normal">Units</span>
                         </span>
                     </div>
@@ -246,14 +294,14 @@ const iconComponent = computed(() => {
 
                 <div class="flex flex-col sm:flex-row gap-4 pt-4">
                     <button @click="router.push(`/sale-items/${product.id}/edit`)"
-                        class="itbms-edit-button w-full font-semibold border-2 rounded-xl px-6 py-3 transition-all duration-300 transform active:scale-95 shadow-md"
+                        class="itbms-edit-button w-full font-semibold border-2 rounded-xl px-6 py-3 transition-all duration-300 transform active:scale-95 shadow-md hover:cursor-pointer"
                         :class="theme === 'dark'
                             ? 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600'
                             : 'bg-yellow-500 text-white border-yellow-500 hover:bg-yellow-600'">
                         Edit Product
                     </button>
                     <button @click="deleteproduct"
-                        class="itbms-delete-button w-full font-semibold border-2 rounded-xl px-6 py-3 transition-all duration-300 transform active:scale-95 shadow-md"
+                        class="itbms-delete-button w-full font-semibold border-2 rounded-xl px-6 py-3 transition-all duration-300 transform active:scale-95 shadow-md hover:cursor-pointer"
                         :class="theme === 'dark'
                             ? 'bg-red-500 text-white border-red-500 hover:bg-red-600'
                             : 'bg-red-500 text-white border-red-500 hover:bg-red-600'">
@@ -272,9 +320,9 @@ const iconComponent = computed(() => {
                     <p class="itbms-message mb-6 text-lg">Are you sure you want to delete this sale item?</p>
                     <div class="flex justify-center gap-4">
                         <button @click="confirmDelete"
-                            class="itbms-confirm-button bg-green-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-green-600 active:scale-95">Yes</button>
+                            class="itbms-confirm-button bg-green-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-green-600 active:scale-95 hover:cursor-pointer">Yes</button>
                         <button @click="cancelDeleteItem"
-                            class="itbms-cancel-button bg-gray-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-gray-600 active:scale-95">No</button>
+                            class="itbms-cancel-button bg-gray-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-gray-600 active:scale-95 hover:cursor-pointer">No</button>
                     </div>
                 </div>
             </div>
@@ -297,9 +345,8 @@ const iconComponent = computed(() => {
 
         <transition name="fade-background">
             <div v-if="isDeleting"
-                class="fixed top-0 left-0 w-full h-full bg-black bg-opacity-30 flex items-center justify-center z-50 loading-overlay">
-                <div
-                    class="p-8 rounded-2xl shadow-xl text-center transition-colors duration-500 transform scale-110"
+                class="itbms-bg fixed top-0 left-0 w-full h-full bg-black bg-opacity-30 flex items-center justify-center z-50 loading-overlay">
+                <div class="p-8 rounded-2xl shadow-xl text-center transition-colors duration-500 transform scale-110"
                     :class="theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-white text-black'">
                     <svg class="animate-spin h-8 w-8 text-orange-500 mx-auto mb-2" xmlns="http://www.w3.org/2000/svg"
                         fill="none" viewBox="0 0 24 24">
@@ -320,7 +367,7 @@ const iconComponent = computed(() => {
                     <h2 class="text-2xl font-bold mb-4 text-green-500">Success!</h2>
                     <p class="itbms-message mb-6 text-lg">The sale item has been successfully updated!</p>
                     <button @click="closeSuccessPopup"
-                        class="bg-green-500 text-white border-2 border-green-500 rounded-full px-6 py-2 transition-colors duration-300 hover:bg-transparent hover:text-green-500 font-semibold">Done</button>
+                        class="bg-green-500 text-white border-2 border-green-500 rounded-full px-6 py-2 transition-colors duration-300 hover:bg-transparent hover:text-green-500 font-semibold hover:cursor-pointer">Done</button>
                 </div>
             </div>
         </transition>
@@ -333,13 +380,13 @@ const iconComponent = computed(() => {
                     <h2 class="text-2xl font-bold mb-4 text-red-500">The sale item has been fail to Edit!</h2>
                     <p class="itbms-message mb-6 text-lg">Please try again later.</p>
                     <button @click="closeSuccessPopup"
-                        class="bg-blue-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-blue-600 active:scale-95">Done</button>
+                        class="bg-blue-500 text-white font-semibold rounded-lg px-6 py-2 transition-all duration-300 hover:bg-blue-600 active:scale-95 hover:cursor-pointer">Done</button>
                 </div>
             </div>
         </transition>
 
         <button @click="toggleTheme"
-            class="fixed bottom-6 right-6 p-4 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 z-50 hover:shadow-2xl"
+            class="fixed bottom-6 right-6 p-4 rounded-full backdrop-blur-md shadow-lg transition-all duration-300 z-50 hover:shadow-2xl hover:cursor-pointer"
             :class="theme === 'dark' ? 'bg-gray-700/80 text-white' : 'bg-gray-200/80 text-black'"
             v-html="iconComponent">
         </button>
@@ -400,8 +447,11 @@ const iconComponent = computed(() => {
 .overflow-x-auto::-webkit-scrollbar {
     display: none;
 }
+
 .overflow-x-auto {
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+    scrollbar-width: none;
+    /* Firefox */
 }
 </style>

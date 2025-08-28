@@ -1,4 +1,13 @@
 <script setup>
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const goToLogin = () => {
+  router.push('/login')
+}
+const goToRegister = () => {
+  router.push('/registers')
+}
 </script>
 
 <template>
@@ -10,7 +19,12 @@
         <a href="#" @click.prevent="scrollTo(services)" class="text-gray-300 hover:text-white transition-colors duration-300">Services</a>
         <a href="#" @click.prevent="scrollTo(contact)" class="text-gray-300 hover:text-white transition-colors duration-300">Contact</a>
       </nav>
-      <button class="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300">Login</button>
+      <div class="flex space-x-4">
+        <button class="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:cursor-pointer"
+        @click="goToRegister">Register</button>
+        <button class="px-6 py-2 bg-gradient-to-r from-orange-500 to-red-500 text-white rounded-full text-sm font-semibold hover:from-orange-600 hover:to-red-600 transition-all duration-300 hover:cursor-pointer"
+        @click="goToLogin">Login</button>
+      </div>
     </header>
 </template>
 <style scoped>

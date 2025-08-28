@@ -1,17 +1,21 @@
 package intregrated.backend.controllers;
 
-import intregrated.backend.dtos.NewSaleItemDto;
-import intregrated.backend.dtos.SaleItemBaseByIdDto;
-import intregrated.backend.dtos.SaleItemBaseDto;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import intregrated.backend.dtos.SaleItems.NewSaleItemDto;
+import intregrated.backend.dtos.SaleItems.SaleItemBaseByIdDto;
+import intregrated.backend.dtos.SaleItems.SaleItemBaseDto;
+import intregrated.backend.dtos.SaleItems.SaleItemWithImageInfo;
 import intregrated.backend.entities.SaleItemBase;
 import intregrated.backend.services.SaleItemBaseService;
 import intregrated.backend.utils.ListMapper;
-import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -36,22 +40,37 @@ public class SaleItemBaseController {
 
     @GetMapping("/{id}")
     public ResponseEntity<SaleItemBaseByIdDto> getSaleItemBaseById(@PathVariable Integer id) {
-        SaleItemBase saleItemBase = saleItemBaseService.getSaleItemBaseRepoById(id);
-
-        return ResponseEntity.ok(modelMapper.map(saleItemBase, SaleItemBaseByIdDto.class));
+        SaleItemBaseByIdDto dto = saleItemBaseService.getSaleItemBaseRepoById(id); // เรียก method ใหม่
+        return ResponseEntity.ok(dto);
     }
 
-    @PostMapping("")
-    public ResponseEntity<SaleItemBaseByIdDto> createSaleItem(@RequestBody @Valid NewSaleItemDto newSaleItem) {
-        SaleItemBaseByIdDto created = saleItemBaseService.createSaleItem(newSaleItem);
+    @PostMapping(value = "", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SaleItemBaseByIdDto> createSaleItem(
+            @RequestPart("saleItem") String saleItemJson,
+            @RequestPart(value = "pictures", required = false) MultipartFile[] pictures
+    ) throws JsonProcessingException {
+
+        NewSaleItemDto newSaleItem = new ObjectMapper().readValue(saleItemJson, NewSaleItemDto.class);
+
+        SaleItemBaseByIdDto created = saleItemBaseService.createSaleItem(newSaleItem, pictures);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<SaleItemBaseByIdDto> editSaleItem(@PathVariable Integer id, @RequestBody NewSaleItemDto newSaleItem) {
-        SaleItemBaseByIdDto editUpdated = saleItemBaseService.editSaleItem(id, newSaleItem);
-        return ResponseEntity.ok(editUpdated);
+
+
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<SaleItemBaseByIdDto> editSaleItem(
+            @PathVariable Integer id,
+            @ModelAttribute SaleItemWithImageInfo request) {
+
+        // SaleItemBaseByIdDto updated = saleItemBaseService
+        //         .editSaleItem(id, request.getSaleItem(), request.getImageInfos());
+
+        SaleItemBaseByIdDto updated = saleItemBaseService.editSaleItem(id, request);
+
+        return ResponseEntity.ok(updated);
     }
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
